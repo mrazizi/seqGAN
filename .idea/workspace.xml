@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2797ef72-3c38-4384-8aa2-c7e5b01aa95c" name="Default" comment="[add] numpy, torch, torchtext requirements">
-      <change afterPath="$PROJECT_DIR$/text_preprocessor.py" afterDir="false" />
+    <list default="true" id="2797ef72-3c38-4384-8aa2-c7e5b01aa95c" name="Default" comment="[add] TextPreprocessor, preprocessing a sample torchtext dataset">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -169,7 +168,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635174595523</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="[add] TextPreprocessor, preprocessing a sample torchtext dataset">
+      <created>1635429606360</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1635429606360</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -220,7 +226,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="[add] numpy, torch, torchtext requirements" />
-    <option name="LAST_COMMIT_MESSAGE" value="[add] numpy, torch, torchtext requirements" />
+    <MESSAGE value="[add] TextPreprocessor, preprocessing a sample torchtext dataset" />
+    <option name="LAST_COMMIT_MESSAGE" value="[add] TextPreprocessor, preprocessing a sample torchtext dataset" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/helpers.py">
