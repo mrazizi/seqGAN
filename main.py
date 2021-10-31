@@ -4,6 +4,9 @@ import numpy as np
 import sys
 import pdb
 
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -15,14 +18,14 @@ import helpers
 from text_preprocessor import TextPreprocessor
 
 
-CUDA = False
+CUDA = True
 VOCAB_SIZE = 12000
 MAX_SEQ_LEN = 200  # was 20 originally
 START_LETTER = 0
 BATCH_SIZE = 32
 MLE_TRAIN_EPOCHS = 100
 ADV_TRAIN_EPOCHS = 50
-POS_NEG_SAMPLES = 10000
+POS_NEG_SAMPLES = 1000
 
 GEN_EMBEDDING_DIM = 32
 GEN_HIDDEN_DIM = 32
@@ -95,20 +98,24 @@ def train_generator_PG(gen, gen_opt, dis, num_batches):
     # print(' oracle_sample_NLL = %.4f' % oracle_loss)
 
 
-def train_discriminator(discriminator, dis_opt, real_data_samples, generator, wiki_samples, d_steps, epochs):
+# def train_discriminator(discriminator, dis_opt, real_data_samples, generator, oracle, d_steps, epochs):
+def train_discriminator(discriminator, dis_opt, real_data_samples, generator, d_steps, epochs):
     """
     Training the discriminator on real_data_samples (positive) and generated samples from generator (negative).
     Samples are drawn d_steps times, and the discriminator is trained for epochs epochs.
     """
 
     # generating a small validation set before training (using oracle and generator)
-    wiki_samples_numpy = wiki_samples.numpy()
-    pos_val = torch.from_numpy(wiki_samples_numpy[np.random.choice(wiki_samples_numpy.shape[0], 100, replace=False)])
+    real_data_samples_numpy = real_data_samples.cpu().numpy()
+    pos_val = torch.from_numpy(real_data_samples_numpy[np.random.choice(real_data_samples_numpy.shape[0], 100, replace=False)])
+    if CUDA:
+        pos_val = pos_val.cuda()
     # pos_val = oracle.sample(100)
     neg_val = generator.sample(100)
-    print(f"[LOG] positive value: {pos_val.size()}")
-    print(f"[LOG] negative value: {neg_val.size()}")
+    print(f"[LOG] positive value: {pos_val.size()}, {pos_val.device}")
+    print(f"[LOG] negative value: {neg_val.size()}, {neg_val.device}")
     val_inp, val_target = helpers.prepare_discriminator_data(pos_val, neg_val, gpu=CUDA)
+    print("here")
 
     for d_step in range(d_steps):
         s = helpers.batchwise_sample(generator, POS_NEG_SAMPLES, BATCH_SIZE)
@@ -123,6 +130,9 @@ def train_discriminator(discriminator, dis_opt, real_data_samples, generator, wi
                 inp, target = dis_inp[i:i + BATCH_SIZE], dis_target[i:i + BATCH_SIZE]
                 dis_opt.zero_grad()
                 out = discriminator.batchClassify(inp)
+                # print("\n----------------")
+                # print(inp)
+                # print("\n----------------")
                 loss_fn = nn.BCELoss()
                 loss = loss_fn(out, target)
                 loss.backward()
@@ -136,6 +146,7 @@ def train_discriminator(discriminator, dis_opt, real_data_samples, generator, wi
                     print('.', end='')
                     sys.stdout.flush()
 
+            print("horo")
             total_loss /= ceil(2 * POS_NEG_SAMPLES / float(BATCH_SIZE))
             total_acc /= float(2 * POS_NEG_SAMPLES)
 
@@ -178,7 +189,7 @@ if __name__ == '__main__':
     print('\nStarting Discriminator Training...')
     dis_optimizer = optim.Adagrad(dis.parameters())
     # train_discriminator(dis, dis_optimizer, wiki_samples, gen, oracle, 50, 3)
-    train_discriminator(dis, dis_optimizer, wiki_samples, gen, wiki_samples, 50, 3)
+    train_discriminator(dis, dis_optimizer, wiki_samples, gen, 50, 3)
 
     # torch.save(dis.state_dict(), pretrained_dis_path)
     # dis.load_state_dict(torch.load(pretrained_dis_path))
@@ -200,4 +211,4 @@ if __name__ == '__main__':
         # TRAIN DISCRIMINATOR
         print('\nAdversarial Training Discriminator : ')
         # train_discriminator(dis, dis_optimizer, wiki_samples, gen, oracle, 5, 3)
-        train_discriminator(dis, dis_optimizer, wiki_samples, gen, wiki_samples, 5, 3)
+        train_discriminator(dis, dis_optimizer, wiki_samples, gen, 50, 3)
